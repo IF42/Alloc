@@ -7,14 +7,16 @@
 
 typedef struct {
     Alloc alloc;
-    char * head;
+    size_t capacity;
+    char * front;
+    char * end;
 } StackAlloc;
 
 
-Alloc * stack_alloc_new(size_t memsize);
+Alloc * stack_alloc_new(size_t capacity);
 
 
-Alloc * stack_alloc_new_from_buffer(void * buffer);
+Alloc * stack_alloc_new_from_buffer(size_t capacity, void * buffer);
 
 
 

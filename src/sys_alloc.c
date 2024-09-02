@@ -1,47 +1,56 @@
 #include "alloc/sys_alloc.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 static void * _new(SysAlloc * self, size_t memsize) {
-    MemNode * mem_node = malloc(sizeof(MemNode *) + memsize);
+    MemNode * node = malloc(sizeof(MemNode) + memsize);
     
-    mem_node->next = self->mem_node;
-    self->mem_node = mem_node;
+    node->next = NULL;
+    node->prev = self->back;
 
-    return (void*) (mem_node + 1);
+    if(self->back != NULL) {
+        self->back->next = node;
+    }
+
+    self->back = node;
+
+    if(self->front == NULL) {
+        self->front = node;
+    }
+
+    return (void*) (node + 1);
 }
 
 
 static void _delete(SysAlloc * self, void * mem) {
-    if(self->mem_node != NULL ) {
-        MemNode * prev = NULL;
-        MemNode * mem_node = self->mem_node;
-        MemNode * node = ((MemNode*) mem) - 1;
-
-        while(mem_node != NULL && node != mem_node) {
-            prev = mem_node;
-            mem_node = mem_node->next;
-        }
-
-        if(prev != NULL) {
-            prev->next = node->next;
-        } else {
-            self->mem_node = node->next;
-        }
-
-        free(node);
+    MemNode * node = (MemNode *) mem - 1;
+    
+    if(node->prev != NULL) {
+        node->prev->next = node->next;
+    } else {
+        self->front = node->next;
     }
+
+    if(node->next != NULL) {
+        node->next->prev = node->prev;
+    } else {
+        self->back = node->prev;
+    }
+
+    free(node);
 }
 
 
 static void _reset(SysAlloc * self) {
-    while(self->mem_node != NULL) {
-        MemNode * next = self->mem_node->next;
-        free(self->mem_node);
-        self->mem_node = next;
+    while(self->front != NULL) {
+        MemNode * node = self->front->next;
+        free(self->front);
+        self->front = node;
     }
 
-    self->mem_node = NULL;
+    self->front = NULL;
+    self->back = NULL;
 }
 
 
@@ -63,8 +72,10 @@ Alloc * sys_alloc_new(void) {
 
     *self = (SysAlloc) {
         .alloc.vtab = &vtab
-        , .mem_node = NULL
     };
 
     return (Alloc*) self;
 }
+
+
+

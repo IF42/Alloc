@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -pedantic -Ofast
-LIBS= -lthr 
+LIBS=  
 
 
 INCLUDE_PATH=

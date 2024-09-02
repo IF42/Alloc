@@ -7,17 +7,20 @@
 
 typedef struct MemNode {
     struct MemNode * next;
+    struct MemNode * prev;
 }MemNode;
 
 
 typedef struct {
     Alloc alloc;
-    MemNode * mem_node;
+    MemNode * front;
+    MemNode * back;
 }SysAlloc;
 
 
 Alloc * sys_alloc_new(void);
 
 
-
 #endif
+
+
