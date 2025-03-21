@@ -1,8 +1,3 @@
-.cache/test.o: test/test.c test/../src/alloc/alloc.h \
- test/../src/alloc/stack_alloc.h test/../src/alloc/base_alloc.h \
- test/../src/alloc/free_list_alloc.h test/../src/alloc/sys_alloc.h
-.cache/free_list_alloc.o: src/free_list_alloc.c src/alloc/free_list_alloc.h \
- src/alloc/base_alloc.h
-.cache/stack_alloc.o: src/stack_alloc.c src/alloc/stack_alloc.h \
- src/alloc/base_alloc.h
-.cache/sys_alloc.o: src/sys_alloc.c src/alloc/sys_alloc.h src/alloc/base_alloc.h
+.cache/arena.o: src/arena.c src/alloc/arena.h src/alloc/alloc.h
+.cache/general.o: src/general.c src/alloc/general.h src/alloc/alloc.h
+.cache/test.o: test/test.c test/../src/alloc/alloc.h

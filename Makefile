@@ -1,19 +1,8 @@
+PLATFORM?=linux_x86_64
+
 CC=gcc
-CFLAGS=-Wall -Wextra -pedantic -Ofast
+CFLAGS=-Wall -Wextra -pedantic -O2
 LIBS=  
-
-
-INCLUDE_PATH=
-LIB_PATH=
-
-
-ifeq ($(UNAME), Linux)	
-	INCLUDE_PATH+=/usr/include/
-	LIB_PATH+=/usr/lib64/
-else
-	INCLUDE_PATH+=/usr/include/
-	LIB_PATH+=/usr/lib/
-endif
 
 
 TARGET=liballoc.a
@@ -21,10 +10,8 @@ CACHE=.cache
 OUTPUT=$(CACHE)/release
 
 
-MODULES += stack_alloc.o
-MODULES += free_list_alloc.o
-MODULES += sys_alloc.o
-
+MODULES += arena.o
+MODULES += general.o
 
 TEST += test.o
 
@@ -35,6 +22,9 @@ T_OBJ=$(addprefix $(CACHE)/,$(TEST))
 
 all: env $(OBJ)
 	ar -crs $(OUTPUT)/$(TARGET) $(OBJ)
+
+
+-include config/$(PLATFORM).mk
 
 
 %.o:
@@ -53,16 +43,15 @@ exec: all $(T_OBJ)
 
 
 dep:
-	$(CC) -MM test/*.c src/*.c | sed 's|[a-zA-Z0-9_-]*\.o|$(CACHE)/&|' > dep.list
-
-
+	$(FIND) src test -name "*.c" | xargs $(CC) -MM | sed 's|[a-zA-Z0-9_-]*\.o|$(CACHE)/&|' > dep.list
 env:
 	mkdir -pv $(CACHE)
 	mkdir -pv $(OUTPUT)
 
 install:
-	cp -v $(OUTPUT)/$(TARGET) $(LIB_PATH)/$(TARGET)
-	cp -vr src/alloc $(INCLUDE_PATH)
+	rm -rvf $(INDIR)/alloc
+	cp -v $(OUTPUT)/$(TARGET) $(LIBDIR)/$(TARGET)
+	cp -vr src/alloc $(INDIR)
 
 clean: 
 	rm -rvf $(OUTPUT)

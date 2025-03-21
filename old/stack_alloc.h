@@ -2,7 +2,7 @@
 #define _STACK_ALLOC_H_ 
 
 
-#include "base_alloc.h"
+#include "alloc_base.h"
 
 
 typedef struct {
@@ -13,10 +13,8 @@ typedef struct {
 } StackAlloc;
 
 
-Alloc * stack_alloc_new(size_t capacity);
 
-
-Alloc * stack_alloc_new_from_buffer(size_t capacity, void * buffer);
+StackAlloc stack_alloc(size_t capacity, void * buffer);
 
 
 

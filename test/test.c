@@ -1,78 +1,56 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "../src/alloc/alloc.h"
+#include "../src/alloc/general.h"
+#include "../src/alloc/arena.h"
 
-#define TEST_SIZE 100
-int * arr[TEST_SIZE];
 
+void general_alloc_test(void) {
+    GeneralAlloc alloc = general_alloc();
 
-void sys_alloc_test(void) {
-    Alloc * alloc = sys_alloc_new();
+    int * value = new(ALLOC(&alloc), sizeof(int));
+    *value = 42;
+    printf("%d\n", *value);
 
-    for(size_t i = 0; i < TEST_SIZE; i++) {
-        arr[i] = new(alloc, sizeof(int));
-        *arr[i] = i;
-    }
+    size_t * next_value = new(ALLOC(&alloc), sizeof(size_t));
+    *next_value = 27;
+    printf("%ld\n", *next_value);
+    next_value = resize(ALLOC(&alloc), next_value, sizeof(size_t) * 2);
 
-    size_t sum = 0;
+    printf("%ld\n", *next_value);
 
-    for(size_t i = TEST_SIZE -1; i > 0; i--) {
-        sum += *arr[i];
-        delete(alloc, arr[i]);
-    }
+    *next_value = 33;
+    printf("%ld\n", *next_value);
+    delete(ALLOC(&alloc), value);
+    delete(ALLOC(&alloc), next_value);
 
-    printf("sum: %ld\n", sum);
-    fflush(stdout);
-
-    for(size_t i = 0; i < TEST_SIZE; i++) {
-        arr[i] = new(alloc, sizeof(int));
-        *arr[i] = i;
-    }
-
-    for(size_t i = TEST_SIZE/4; i < TEST_SIZE/2; i++) {
-        delete(alloc, arr[i]);
-    }
-
-    finalize(alloc);
+    finalize(ALLOC(&alloc));
 }
 
 
-void sys_alloc_realloc_test(void) {
-    size_t size = 0;
-    size_t index = 0; 
-    void * ptr = NULL;
-    Alloc * alloc = sys_alloc_new();
+void arena_alloc_test(void) {
+    ArenaAlloc alloc = arena_alloc(1024);
 
-    while(size < TEST_SIZE) {
-        if(size == 0) {
-            size = 2;
-            ptr = new(alloc, size);
-        } else {
-            size *= 2;
-            void * mem = new(alloc, size);
-            delete(alloc, ptr);
-            ptr = mem;
-        }
+    int * value = new(ALLOC(&alloc), sizeof(int));
+    assert(value != NULL);
+    *value = 42;
+    printf("%d %ld\n", *value, *(((size_t*) value) - 1));
+ 
+    //size_t * next = new(ALLOC(&alloc), sizeof(size_t));    
 
-        index ++;
+    value = resize(ALLOC(&alloc), value, sizeof(int)*2);
+    printf("%d %ld\n", *value, *(((size_t*) value) - 1));
 
-        printf("%ld - %ld\n", index, size);
-    }
-
-    finalize(alloc);
+    finalize(ALLOC(&alloc));
 }
-
 
 
 int main(void) {
-    //stack_alloc_test();
-    //test_tensor();
-    //free_list_alloc_test();
-    sys_alloc_test();
-    sys_alloc_realloc_test();
-
+    //general_alloc_test();
+    arena_alloc_test();
     printf("Program exit..\n");
     return EXIT_SUCCESS;
 }
